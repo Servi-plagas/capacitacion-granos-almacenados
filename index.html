@@ -112,7 +112,7 @@
     svg [class*="anim-"] { transform-box: fill-box; transform-origin: center; }
     @keyframes anim-bob    { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
     @keyframes anim-pop    { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
-    @keyframes anim-flow   { to { stroke-dashoffset: -40; } }
+    @keyframes anim-flow   { to { stroke-dashoffset: -36; } }  /* múltiplo del patrón 8+10 para que el bucle no salte */
     @keyframes anim-twinkle{ 0%,100% { opacity: .15; } 50% { opacity: 1; } }
     @keyframes anim-drip   { 0% { transform: translateY(0); opacity: 0; } 12% { opacity: 1; } 68% { transform: translateY(46px); opacity: 1; } 80%,100% { transform: translateY(46px); opacity: 0; } }
     @keyframes anim-run    { 0% { transform: translateX(0); opacity: 0; } 8% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateX(var(--d, 150px)); opacity: 0; } }
@@ -164,6 +164,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       svg * { animation: none !important; }
+      svg .anim-step { opacity: 0; } /* rueda del módulo 8: sin resaltado ámbar en la versión estática */
     }
 
     /* Tarjetas de especie / grupo */
@@ -307,8 +308,10 @@
 
     /* animaciones adicionales */
     @keyframes anim-flutter { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-6px) rotate(6deg); } }
-    @keyframes anim-step    { 0% { opacity: 0; } 5%,26% { opacity: 1; } 32%,100% { opacity: 0; } }
-    @keyframes anim-gauge   { 0%,15% { transform: rotate(-70deg); } 70%,100% { transform: rotate(62deg); } }
+    /* rueda de 7 pasos (módulo 8): cada nodo se enciende 1/7 del ciclo, uno a la vez */
+    @keyframes anim-step    { 0% { opacity: 0; } 3%,13% { opacity: 1; } 16%,100% { opacity: 0; } }
+    /* medidor (módulo 1): baja de verde a rojo mientras aparecen los gorgojos y vuelve al reiniciar el ciclo */
+    @keyframes anim-gauge   { 0%,6% { transform: rotate(-75deg); } 84%,93% { transform: rotate(75deg); } 100% { transform: rotate(-75deg); } }
     @keyframes anim-fadeout { 0%,25% { opacity: 1; } 55%,100% { opacity: .12; } }
     @keyframes anim-hop     { 0%,100% { transform: translate(0,0); } 30% { transform: translate(var(--hx, 30px), -34px); } 60% { transform: translate(var(--hx2, 60px), 0); } 60.01% { transform: translate(0,0); } }
     @keyframes anim-ring    { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(1.6); opacity: 0; } }
@@ -321,7 +324,50 @@
     .anim-ring     { animation: anim-ring 1.8s ease-out infinite; }
     .anim-nightday { animation: anim-nightday 8s ease-in-out infinite; }
     .anim-shake    { animation: anim-shake 2.6s ease-in-out infinite; }
-    svg .anim-gauge   { transform-origin: var(--ox, 50%) var(--oy, 50%); animation: anim-gauge 7s ease-in-out infinite alternate; }
+    /* la aguja gira sobre un punto del viewBox, no de su propia caja (una línea vertical no tiene ancho) */
+    svg .anim-gauge   { transform-box: view-box; transform-origin: var(--ox, 50%) var(--oy, 50%); animation: anim-gauge 8s ease-in-out infinite; }
+
+    /* secuencias sincronizadas (ciclo de 8 s) */
+    /* aparecen uno tras otro y desaparecen todos juntos: "pocos hoy, muchos mañana" */
+    @keyframes anim-appear-1 { 0%,4%  { opacity: 0; transform: scale(.4); } 8%,90%  { opacity: 1; transform: scale(1); } 95%,100% { opacity: 0; transform: scale(1); } }
+    @keyframes anim-appear-2 { 0%,24% { opacity: 0; transform: scale(.4); } 28%,90% { opacity: 1; transform: scale(1); } 95%,100% { opacity: 0; transform: scale(1); } }
+    @keyframes anim-appear-3 { 0%,44% { opacity: 0; transform: scale(.4); } 48%,90% { opacity: 1; transform: scale(1); } 95%,100% { opacity: 0; transform: scale(1); } }
+    @keyframes anim-appear-4 { 0%,64% { opacity: 0; transform: scale(.4); } 68%,90% { opacity: 1; transform: scale(1); } 95%,100% { opacity: 0; transform: scale(1); } }
+    .anim-appear-1 { animation: anim-appear-1 8s ease-out infinite both; }
+    .anim-appear-2 { animation: anim-appear-2 8s ease-out infinite both; }
+    .anim-appear-3 { animation: anim-appear-3 8s ease-out infinite both; }
+    .anim-appear-4 { animation: anim-appear-4 8s ease-out infinite both; }
+    /* barra de tiempo que avanza durante casi todo el ciclo; los pasos se marcan cuando la barra llega a cada uno */
+    @keyframes anim-timeline { 0% { transform: scaleX(0); opacity: 1; } 82% { transform: scaleX(1); opacity: 1; } 92%,100% { transform: scaleX(1); opacity: 0; } }
+    svg .anim-timeline { transform-origin: left center; animation: anim-timeline 8s linear infinite both; }
+    /* etapas consecutivas (módulo 3): solo una resaltada a la vez, siguiendo la barra */
+    @keyframes anim-stage-1 { 0%,3%  { opacity: 0; } 6%,27%  { opacity: 1; } 30%,100% { opacity: 0; } }
+    @keyframes anim-stage-2 { 0%,27% { opacity: 0; } 30%,51% { opacity: 1; } 54%,100% { opacity: 0; } }
+    @keyframes anim-stage-3 { 0%,51% { opacity: 0; } 54%,75% { opacity: 1; } 78%,100% { opacity: 0; } }
+    @keyframes anim-stage-4 { 0%,75% { opacity: 0; } 78%,90% { opacity: 1; } 94%,100% { opacity: 0; } }
+    .anim-stage-1 { animation: anim-stage-1 8s linear infinite both; }
+    .anim-stage-2 { animation: anim-stage-2 8s linear infinite both; }
+    .anim-stage-3 { animation: anim-stage-3 8s linear infinite both; }
+    .anim-stage-4 { animation: anim-stage-4 8s linear infinite both; }
+    /* el adulto asoma por el agujero durante la etapa 3 */
+    @keyframes anim-exit { 0%,54% { transform: translateX(0); } 66%,74% { transform: translateX(var(--d, 10px)); } 80%,100% { transform: translateX(0); } }
+    .anim-exit { animation: anim-exit 8s ease-in-out infinite; }
+    /* chulos que se acumulan (módulo 6) y se borran todos al reiniciar */
+    @keyframes anim-tick-1 { 0%,7%  { opacity: 0; transform: scale(.5); } 10%,90% { opacity: 1; transform: scale(1); } 94%,100% { opacity: 0; transform: scale(1); } }
+    @keyframes anim-tick-2 { 0%,40% { opacity: 0; transform: scale(.5); } 43%,90% { opacity: 1; transform: scale(1); } 94%,100% { opacity: 0; transform: scale(1); } }
+    @keyframes anim-tick-3 { 0%,73% { opacity: 0; transform: scale(.5); } 76%,90% { opacity: 1; transform: scale(1); } 94%,100% { opacity: 0; transform: scale(1); } }
+    .anim-tick-1 { animation: anim-tick-1 8s ease-out infinite both; }
+    .anim-tick-2 { animation: anim-tick-2 8s ease-out infinite both; }
+    .anim-tick-3 { animation: anim-tick-3 8s ease-out infinite both; }
+    /* camión que llega y se queda parqueado frente a la bodega */
+    @keyframes anim-arrive { 0% { transform: translateX(var(--from, -80px)); opacity: 0; } 8% { opacity: 1; } 40%,85% { transform: translateX(0); opacity: 1; } 93%,100% { transform: translateX(0); opacity: 0; } }
+    .anim-arrive { animation: anim-arrive 9s ease-out infinite both; }
+    /* polilla que viene de afuera y entra por la ventana (desplazamiento en diagonal) */
+    @keyframes anim-enter { 0% { transform: translate(0,0); opacity: 0; } 10% { opacity: 1; } 72% { transform: translate(var(--tx, -50px), var(--ty, 50px)); opacity: 1; } 84%,100% { transform: translate(var(--tx, -50px), var(--ty, 50px)); opacity: 0; } }
+    .anim-enter { animation: anim-enter 6s ease-in-out infinite both; }
+    /* insecto que choca con la malla y rebota */
+    @keyframes anim-bounce { 0% { transform: translateX(0); opacity: 0; } 10% { opacity: 1; } 40%,50% { transform: translateX(var(--d, 10px)); } 85% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(0); opacity: 0; } }
+    .anim-bounce { animation: anim-bounce 3s ease-in-out infinite both; }
   </style>
 </head>
 <body>
@@ -450,24 +496,23 @@
             <ellipse cx="236" cy="206" rx="18" ry="4" fill="#e9c46a"/>
 
             <!-- gorgojos que aparecen -->
-            <use href="#ic-weevil" x="60" y="178" width="30" height="16" style="color:#4a2e14" class="anim-show"/>
-            <use href="#ic-weevil" x="168" y="104" width="30" height="16" style="color:#4a2e14;animation-delay:1.5s" class="anim-show"/>
-            <use href="#ic-weevil" x="186" y="124" width="26" height="14" style="color:#4a2e14;animation-delay:3s" class="anim-show"/>
-            <use href="#ic-weevil" x="292" y="186" width="30" height="16" style="color:#4a2e14;animation-delay:4.5s" class="anim-show"/>
+            <g class="anim-appear-1"><use href="#ic-weevil" x="60" y="178" width="30" height="16" style="color:#4a2e14"/></g>
+            <g class="anim-appear-2"><use href="#ic-weevil" x="168" y="104" width="30" height="16" style="color:#4a2e14"/></g>
+            <g class="anim-appear-3"><use href="#ic-weevil" x="186" y="124" width="26" height="14" style="color:#4a2e14"/></g>
+            <g class="anim-appear-4"><use href="#ic-weevil" x="292" y="186" width="30" height="16" style="color:#4a2e14"/></g>
             <use href="#ic-weevil" x="110" y="190" width="26" height="14" style="color:#4a2e14;--d:40px" class="anim-run"/>
 
             <!-- medidor de calidad -->
-            <rect x="238" y="8" width="154" height="52" rx="12" fill="#fff" stroke="#e6ece7"/>
-            <text class="f-title" x="315" y="24" text-anchor="middle">CALIDAD DEL GRANO</text>
-            <path d="M262 52 A40 40 0 0 1 302 14" fill="none" stroke="#27ae60" stroke-width="7" stroke-linecap="round"/>
-            <path d="M302 14 A40 40 0 0 1 342 52" fill="none" stroke="#c0392b" stroke-width="7" stroke-linecap="round"/>
-            <path d="M288 20 A40 40 0 0 1 318 20" fill="none" stroke="#f0a500" stroke-width="7"/>
-            <g class="anim-gauge" style="--ox:302px;--oy:52px">
-              <path d="M302 52 L302 22" stroke="#2f3b33" stroke-width="3" stroke-linecap="round"/>
-            </g>
-            <circle cx="302" cy="52" r="4" fill="#2f3b33"/>
-            <text class="f-sub" x="262" y="58" text-anchor="middle" style="font-weight:700;fill:#27ae60">bien</text>
-            <text class="f-sub" x="344" y="58" text-anchor="middle" style="font-weight:700;fill:#c0392b">pérdidas</text>
+            <rect x="238" y="8" width="154" height="56" rx="12" fill="#fff" stroke="#e6ece7"/>
+            <text class="f-title" x="315" y="21" text-anchor="middle">CALIDAD DEL GRANO</text>
+            <!-- arco de 180°, centro (310,58) r=28: verde, ámbar, rojo -->
+            <path d="M282 58 A28 28 0 0 1 296 33.8" fill="none" stroke="#27ae60" stroke-width="7" stroke-linecap="round"/>
+            <path d="M296 33.8 A28 28 0 0 1 324 33.8" fill="none" stroke="#f0a500" stroke-width="7"/>
+            <path d="M324 33.8 A28 28 0 0 1 338 58" fill="none" stroke="#c0392b" stroke-width="7" stroke-linecap="round"/>
+            <path d="M310 58 L310 38" stroke="#2f3b33" stroke-width="3" stroke-linecap="round" class="anim-gauge" style="--ox:310px;--oy:58px"/>
+            <circle cx="310" cy="58" r="4" fill="#2f3b33"/>
+            <text class="f-sub" x="258" y="58" text-anchor="middle" style="font-weight:700;fill:#27ae60">bien</text>
+            <text class="f-sub" x="366" y="58" text-anchor="middle" style="font-weight:700;fill:#c0392b">pérdidas</text>
 
             <!-- título izquierda -->
             <text class="f-title" x="12" y="24">ARROZ, TRIGO, MAÍZ…</text>
@@ -519,12 +564,12 @@
             <path d="M262 212 L270 206 L276 212 L284 206 L292 212" fill="none" stroke="#9a8a70" stroke-width="1.5"/>
             <g fill="#e9c46a"><circle cx="258" cy="210" r="1.8"/><circle cx="300" cy="210" r="1.8"/><circle cx="318" cy="209" r="1.6"/><circle cx="330" cy="210" r="1.8"/></g>
             <path d="M360 212 L366 196 L372 212" fill="none" stroke="#6b5a40" stroke-width="2" stroke-linejoin="round"/>
-            <use href="#ic-beetle" x="300" y="200" width="22" height="12" style="color:#7a3b1e" class="anim-show"/>
-            <use href="#ic-larva" x="266" y="202" width="16" height="8" style="color:#f1e6cf;animation-delay:2s" class="anim-show"/>
-            <use href="#ic-beetle" x="352" y="200" width="22" height="12" style="color:#7a3b1e;animation-delay:4s" class="anim-show"/>
+            <g class="anim-appear-1"><use href="#ic-beetle" x="300" y="200" width="22" height="12" style="color:#7a3b1e"/></g>
+            <g class="anim-appear-2"><use href="#ic-larva" x="266" y="202" width="16" height="8" style="color:#f1e6cf"/></g>
+            <g class="anim-appear-3"><use href="#ic-beetle" x="352" y="200" width="22" height="12" style="color:#7a3b1e"/></g>
 
-            <!-- camión que llega -->
-            <g class="anim-run" style="--d:60px;animation-duration:9s">
+            <!-- camión que llega y se queda frente a la bodega -->
+            <g class="anim-arrive" style="--from:-110px">
               <rect x="8" y="150" width="92" height="52" rx="6" fill="#2a7a48"/>
               <rect x="100" y="166" width="38" height="36" rx="5" fill="#1a5632"/>
               <rect x="106" y="172" width="18" height="14" rx="2" fill="#dbe9f0"/>
@@ -535,21 +580,21 @@
               <use href="#ic-weevil" x="58" y="176" width="20" height="11" style="color:#4a2e14"/>
             </g>
 
-            <!-- polilla que entra por la ventana -->
-            <g class="anim-run" style="--d:90px;animation-duration:6s">
-              <use href="#ic-moth" x="226" y="104" width="30" height="16" style="color:#b58a52" class="anim-flutter"/>
+            <!-- polilla que viene de afuera (sobre el techo) y entra por la ventana -->
+            <g class="anim-enter" style="--tx:-55px;--ty:53px">
+              <g class="anim-flutter"><use href="#ic-moth" x="365" y="62" width="30" height="16" style="color:#b58a52"/></g>
             </g>
 
             <!-- etiquetas numeradas -->
             <g>
-              <circle cx="64" cy="124" r="12" fill="#1a5632"/><text class="f-num" x="64" y="128" text-anchor="middle">1</text>
-              <text class="f-label" x="84" y="122">Con la mercancía</text>
-              <text class="f-sub" x="84" y="136">desde el origen o el transporte</text>
+              <circle cx="20" cy="120" r="12" fill="#1a5632"/><text class="f-num" x="20" y="124" text-anchor="middle">1</text>
+              <text class="f-label" x="38" y="118">Con la mercancía</text>
+              <text class="f-sub" x="38" y="132">del campo o del camión</text>
             </g>
             <g>
-              <circle cx="268" cy="80" r="12" fill="#1a5632"/><text class="f-num" x="268" y="84" text-anchor="middle">2</text>
-              <text class="f-label" x="392" y="74" text-anchor="end">Desde afuera</text>
-              <text class="f-sub" x="392" y="88" text-anchor="end">por puertas y ventanas</text>
+              <circle cx="292" cy="17" r="11" fill="#1a5632"/><text class="f-num" x="292" y="21" text-anchor="middle">2</text>
+              <text class="f-label" x="392" y="22" text-anchor="end">Desde afuera</text>
+              <text class="f-sub" x="392" y="36" text-anchor="end">por puertas y ventanas</text>
             </g>
             <g>
               <circle cx="20" cy="236" r="12" fill="#c0392b"/><text class="f-num" x="20" y="240" text-anchor="middle">3</text>
@@ -591,7 +636,7 @@
               <path d="M52 56 C84 86 88 146 52 184 C16 146 20 86 52 56 Z" fill="#e9c46a" stroke="#c9a24d" stroke-width="1.5"/>
               <path d="M52 70 V170" stroke="#c9a24d" stroke-width="1.5" stroke-dasharray="3 3"/>
               <circle cx="52" cy="110" r="5" fill="#fff" stroke="#8a6a45" stroke-width="1.5"/>
-              <circle cx="52" cy="110" r="18" fill="none" stroke="#1a5632" stroke-width="2.5" class="anim-step"/>
+              <circle cx="52" cy="110" r="18" fill="none" stroke="#1a5632" stroke-width="2.5" class="anim-stage-1"/>
               <text class="f-label" x="52" y="208" text-anchor="middle">1. Huevo</text>
               <text class="f-sub" x="52" y="222" text-anchor="middle">la hembra lo pone</text>
               <text class="f-sub" x="52" y="234" text-anchor="middle">dentro del grano</text>
@@ -601,7 +646,7 @@
               <path d="M150 56 C182 86 186 146 150 184 C114 146 118 86 150 56 Z" fill="#e9c46a" stroke="#c9a24d" stroke-width="1.5"/>
               <ellipse cx="150" cy="118" rx="14" ry="26" fill="#f6ecd3"/>
               <use href="#ic-larva" x="136" y="106" width="28" height="14" style="color:#f1e6cf" class="anim-bob"/>
-              <circle cx="150" cy="118" r="30" fill="none" stroke="#1a5632" stroke-width="2.5" class="anim-step" style="animation-delay:2s"/>
+              <circle cx="150" cy="118" r="30" fill="none" stroke="#1a5632" stroke-width="2.5" class="anim-stage-2"/>
               <text class="f-label" x="150" y="208" text-anchor="middle">2. Larva</text>
               <text class="f-sub" x="150" y="222" text-anchor="middle">crece y come</text>
               <text class="f-sub" x="150" y="234" text-anchor="middle">por dentro</text>
@@ -611,8 +656,8 @@
               <path d="M248 56 C280 86 284 146 248 184 C212 146 216 86 248 56 Z" fill="#e9c46a" stroke="#c9a24d" stroke-width="1.5"/>
               <ellipse cx="248" cy="120" rx="12" ry="30" fill="#d9b25a"/>
               <circle cx="266" cy="112" r="6" fill="#5a3a1e"/>
-              <use href="#ic-weevil" x="262" y="102" width="36" height="20" style="color:#4a2e14;--d:16px" class="anim-run" />
-              <circle cx="266" cy="112" r="30" fill="none" stroke="#1a5632" stroke-width="2.5" class="anim-step" style="animation-delay:4s"/>
+              <use href="#ic-weevil" x="262" y="102" width="36" height="20" style="color:#4a2e14;--d:10px" class="anim-exit"/>
+              <circle cx="266" cy="112" r="30" fill="none" stroke="#1a5632" stroke-width="2.5" class="anim-stage-3"/>
               <text class="f-label" x="248" y="208" text-anchor="middle">3. Adulto</text>
               <text class="f-sub" x="248" y="222" text-anchor="middle">sale y deja</text>
               <text class="f-sub" x="248" y="234" text-anchor="middle">un agujero</text>
@@ -622,7 +667,7 @@
               <path d="M346 56 C378 86 382 146 346 184 C310 146 314 86 346 56 Z" fill="#d9b25a" stroke="#b08a3a" stroke-width="1.5"/>
               <ellipse cx="346" cy="120" rx="11" ry="28" fill="#a87f3a"/>
               <circle cx="360" cy="110" r="6" fill="#5a3a1e"/>
-              <circle cx="346" cy="120" r="34" fill="none" stroke="#c0392b" stroke-width="2.5" class="anim-step" style="animation-delay:6s"/>
+              <circle cx="346" cy="120" r="34" fill="none" stroke="#c0392b" stroke-width="2.5" class="anim-stage-4"/>
               <text class="f-label" x="346" y="208" text-anchor="middle" style="fill:#c0392b">4. Grano vacío</text>
               <text class="f-sub" x="346" y="222" text-anchor="middle">perforado y</text>
               <text class="f-sub" x="346" y="234" text-anchor="middle">sin contenido</text>
@@ -630,7 +675,7 @@
 
             <!-- línea de tiempo -->
             <path d="M30 40 H370" stroke="#e2eae4" stroke-width="6" stroke-linecap="round"/>
-            <path d="M30 40 H370" stroke="#f0a500" stroke-width="6" stroke-linecap="round" class="anim-growx" style="animation-duration:8s"/>
+            <path d="M30 40 H370" stroke="#f0a500" stroke-width="6" stroke-linecap="round" class="anim-timeline"/>
             <text class="f-sub" x="370" y="30" text-anchor="end" style="font-weight:700;fill:#8a6400">4 a 6 semanas</text>
           </svg>
           <figcaption><b>Por eso no se ve:</b> el huevo, la larva y casi toda la vida del gorgojo pasan <b>dentro del grano</b>. Cuando aparecen los adultos, ya hay muchos.</figcaption>
@@ -688,18 +733,20 @@
               <circle cx="222" cy="156" r="1.3" class="anim-fall" style="--fy:26px;animation-delay:1.8s"/>
             </g>
             <!-- polilla adulta volando -->
-            <use href="#ic-moth" x="96" y="92" width="64" height="34" style="color:#b58a52" class="anim-flutter"/>
-            <text class="f-label" x="128" y="76" text-anchor="middle">Polilla adulta</text>
-            <text class="f-sub" x="128" y="90" text-anchor="middle">7 a 10 mm, marrón claro con manchas</text>
+            <g class="anim-sway" style="animation-duration:5s">
+              <g class="anim-flutter"><use href="#ic-moth" x="64" y="88" width="64" height="34" style="color:#b58a52"/></g>
+            </g>
+            <text class="f-label" x="104" y="64" text-anchor="middle">Polilla adulta</text>
+            <text class="f-sub" x="104" y="78" text-anchor="middle">7 a 10 mm, marrón claro con manchas</text>
 
             <!-- etiquetas -->
             <text class="f-label" x="12" y="130">Larva</text>
             <text class="f-sub" x="12" y="144">blanca, es la que come</text>
             <path d="M58 136 L104 184" stroke="#8a968d" stroke-width="1.2"/>
 
-            <text class="f-label" x="236" y="126" text-anchor="end" style="fill:#8a6400">Hilos y polvo fino</text>
-            <text class="f-sub" x="236" y="140" text-anchor="end">las señales que deja</text>
-            <path d="M226 144 L206 164" stroke="#8a968d" stroke-width="1.2"/>
+            <text class="f-label" x="240" y="130" text-anchor="end" style="fill:#8a6400">Hilos y polvo fino</text>
+            <text class="f-sub" x="240" y="144" text-anchor="end">las señales que deja</text>
+            <path d="M226 148 L208 166" stroke="#8a968d" stroke-width="1.2"/>
 
             <!-- trampa de feromonas -->
             <g>
@@ -710,8 +757,9 @@
               <text class="f-title" x="318" y="228" text-anchor="middle">TRAMPA DE FEROMONAS</text>
               <text class="f-sub" x="318" y="242" text-anchor="middle">atrae y captura adultos</text>
             </g>
-            <g class="anim-run" style="--d:60px;animation-duration:5s">
-              <use href="#ic-moth" x="248" y="166" width="28" height="15" style="color:#b58a52" class="anim-flutter"/>
+            <!-- polilla que sale del grano y va hacia el cebo de la trampa -->
+            <g class="anim-run" style="--d:70px;animation-duration:5s">
+              <g class="anim-flutter"><use href="#ic-moth" x="236" y="176" width="28" height="15" style="color:#b58a52"/></g>
             </g>
           </svg>
           <figcaption>La polilla adulta <b>no come el grano</b>: la que hace el daño es la <b>larva</b>. Las trampas de feromonas sirven para <b>contar y vigilar</b> los adultos.</figcaption>
@@ -763,11 +811,11 @@
             <rect x="228" y="104" width="70" height="56" rx="10" fill="#e3c592" stroke="#c8a56d" stroke-width="1.5"/>
             <rect x="124" y="48" width="66" height="56" rx="10" fill="#e3c592" stroke="#c8a56d" stroke-width="1.5"/>
             <rect x="196" y="48" width="66" height="56" rx="10" fill="#e3c592" stroke="#c8a56d" stroke-width="1.5"/>
-            <!-- costal roto -->
-            <path d="M292 140 L298 132 L304 142" fill="none" stroke="#8a6a45" stroke-width="1.5"/>
+            <!-- costal roto: hueco por donde se sale el grano -->
+            <ellipse cx="292" cy="148" rx="3.5" ry="5" fill="#6b4f2a"/>
             <g fill="#e9c46a">
-              <circle cx="300" cy="150" r="2.4" class="anim-fall" style="--fy:46px"/>
-              <circle cx="306" cy="146" r="2" class="anim-fall" style="--fy:50px;animation-delay:.9s"/>
+              <circle cx="298" cy="152" r="2.4" class="anim-fall" style="--fy:42px"/>
+              <circle cx="303" cy="156" r="2" class="anim-fall" style="--fy:38px;animation-delay:.9s"/>
             </g>
 
             <!-- polvo y grano partido debajo -->
@@ -779,14 +827,14 @@
               <circle cx="230" cy="192" r="2"/><circle cx="250" cy="190" r="1.6"/><circle cx="330" cy="190" r="2"/><circle cx="350" cy="194" r="1.8"/>
             </g>
             <!-- escarabajos -->
-            <use href="#ic-beetle" x="104" y="186" width="26" height="14" style="color:#8a3b1e;--d:60px" class="anim-run"/>
-            <use href="#ic-beetle" x="216" y="186" width="26" height="14" style="color:#8a3b1e;--d:50px;animation-delay:2s" class="anim-run"/>
+            <use href="#ic-beetle" x="104" y="186" width="26" height="14" style="color:#8a3b1e;--d:40px" class="anim-run"/>
+            <use href="#ic-beetle" x="216" y="186" width="26" height="14" style="color:#8a3b1e;--d:34px;animation-delay:2s" class="anim-run"/>
             <use href="#ic-beetle" x="318" y="184" width="26" height="14" style="color:#8a3b1e" class="anim-bob"/>
             <use href="#ic-larva" x="140" y="182" width="22" height="11" style="color:#f6efdc" class="anim-bob"/>
-            <use href="#ic-beetle" x="244" y="124" width="22" height="12" style="color:#8a3b1e;animation-delay:1s" class="anim-show"/>
+            <g class="anim-show" style="animation-delay:1s"><use href="#ic-beetle" x="244" y="124" width="22" height="12" style="color:#8a3b1e"/></g>
 
             <!-- lupa -->
-            <g class="anim-brush" style="--d:150px;animation-duration:7s">
+            <g class="anim-brush" style="--d:96px;animation-duration:7s">
               <circle cx="120" cy="196" r="28" fill="#fff" fill-opacity=".45" stroke="#1a5632" stroke-width="3"/>
               <path d="M141 216 L162 234" stroke="#1a5632" stroke-width="6" stroke-linecap="round"/>
             </g>
@@ -795,14 +843,14 @@
             <text class="f-title" x="12" y="24">¿DÓNDE BUSCARLO?</text>
             <text class="f-label" x="12" y="44">Bajo la estiba</text>
             <text class="f-sub" x="12" y="58">polvo y grano partido</text>
-            <text class="f-label" x="12" y="80">En las esquinas</text>
-            <text class="f-sub" x="12" y="94">y junto a las paredes</text>
-            <path d="M76 90 C84 120 90 150 100 184" fill="none" stroke="#8a968d" stroke-width="1.2" stroke-dasharray="3 3"/>
+            <path d="M56 64 C50 110 60 150 96 186" fill="none" stroke="#8a968d" stroke-width="1.2" stroke-dasharray="3 3"/>
+            <text class="f-label" x="366" y="220" text-anchor="end">En las esquinas</text>
+            <text class="f-sub" x="366" y="234" text-anchor="end">y junto a las paredes</text>
 
             <text class="f-label" x="300" y="28" text-anchor="middle">Adulto</text>
             <text class="f-sub" x="300" y="42" text-anchor="middle">3 a 4 mm, ovalado,</text>
             <text class="f-sub" x="300" y="55" text-anchor="middle">marrón rojizo</text>
-            <use href="#ic-beetle" x="276" y="60" width="48" height="26" style="color:#8a3b1e" class="anim-pop"/>
+            <g class="anim-pop"><use href="#ic-beetle" x="276" y="60" width="48" height="26" style="color:#8a3b1e"/></g>
           </svg>
           <figcaption><b>Vive de las sobras:</b> grano partido, polvo y residuos debajo de estibas y en esquinas lo mantienen vivo. Si no limpias eso, la plaga se queda.</figcaption>
         </figure>
@@ -839,7 +887,7 @@
 
             <!-- línea -->
             <path d="M40 140 H360" stroke="#e2eae4" stroke-width="6" stroke-linecap="round"/>
-            <path d="M40 140 H360" stroke="#1a5632" stroke-width="6" stroke-linecap="round" class="anim-growx" style="animation-duration:8s"/>
+            <path d="M40 140 H360" stroke="#1a5632" stroke-width="6" stroke-linecap="round" class="anim-timeline"/>
 
             <!-- 1 recepción -->
             <g>
@@ -854,7 +902,7 @@
               <text class="f-label" x="70" y="176" text-anchor="middle">Al recibir</text>
               <text class="f-sub" x="70" y="190" text-anchor="middle">empaques, muestras,</text>
               <text class="f-sub" x="70" y="203" text-anchor="middle">insectos, polvo, hilos</text>
-              <g class="anim-step" style="animation-delay:1.5s">
+              <g class="anim-tick-1">
                 <circle cx="70" cy="140" r="16" fill="#27ae60"/>
                 <path d="M62 140 L68 146 L79 134" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               </g>
@@ -873,7 +921,7 @@
               <text class="f-label" x="200" y="176" text-anchor="middle">Durante</text>
               <text class="f-sub" x="200" y="190" text-anchor="middle">producto, estibas, esquinas,</text>
               <text class="f-sub" x="200" y="203" text-anchor="middle">polvo debajo y trampas</text>
-              <g class="anim-step" style="animation-delay:4s">
+              <g class="anim-tick-2">
                 <circle cx="200" cy="140" r="16" fill="#27ae60"/>
                 <path d="M192 140 L198 146 L209 134" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               </g>
@@ -895,7 +943,7 @@
               <text class="f-label" x="330" y="176" text-anchor="middle">Antes del lote nuevo</text>
               <text class="f-sub" x="330" y="190" text-anchor="middle">retirar residuos, limpiar,</text>
               <text class="f-sub" x="330" y="203" text-anchor="middle">sellar grietas, dejar seco</text>
-              <g class="anim-step" style="animation-delay:6.5s">
+              <g class="anim-tick-3">
                 <circle cx="330" cy="140" r="16" fill="#27ae60"/>
                 <path d="M322 140 L328 146 L339 134" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               </g>
@@ -943,13 +991,20 @@
             <!-- malla -->
             <rect x="36" y="150" width="64" height="40" rx="3" fill="#dbe9f0" stroke="#8a968d" stroke-width="1.5"/>
             <path d="M36 160 H100 M36 170 H100 M36 180 H100 M48 150 V190 M60 150 V190 M72 150 V190 M84 150 V190" stroke="#8a968d" stroke-width="1"/>
-            <g class="anim-run" style="--d:34px;animation-duration:3s">
-              <use href="#ic-moth" x="6" y="160" width="22" height="12" style="color:#b58a52"/>
+            <!-- la polilla choca con la malla y rebota -->
+            <g class="anim-bounce" style="--d:8px">
+              <g class="anim-flutter"><use href="#ic-moth" x="6" y="162" width="22" height="12" style="color:#b58a52"/></g>
             </g>
             <text class="f-sub" x="68" y="206" text-anchor="middle">mallas y sellar grietas</text>
             <!-- humedad -->
-            <path d="M58 220 C58 214 64 208 64 208 C64 208 70 214 70 220 A6 6 0 0 1 58 220 Z" fill="#3a9cc4" class="anim-pop"/>
-            <path d="M78 212 L88 212 M78 218 L92 218 M78 224 L86 224" stroke="#c0392b" stroke-width="2" stroke-linecap="round"/>
+            <!-- gota (humedad) y termómetro (calor) con flecha hacia abajo: menos -->
+            <path d="M44 226 C44 220 50 212 50 212 C50 212 56 220 56 226 A6 6 0 0 1 44 226 Z" fill="#3a9cc4" class="anim-pop"/>
+            <rect x="65" y="211" width="6" height="15" rx="3" fill="#fff" stroke="#c0392b" stroke-width="1.5"/>
+            <path d="M68 217 V227" stroke="#c0392b" stroke-width="2.5"/>
+            <circle cx="68" cy="229.5" r="4.5" fill="#c0392b"/>
+            <g class="anim-dip" style="--d:4px;animation-duration:2s">
+              <path d="M88 212 V228 M83 223 L88 228 L93 223" fill="none" stroke="#1a5632" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
             <text class="f-sub" x="68" y="244" text-anchor="middle">menos humedad y calor</text>
 
             <!-- QUÍMICO -->
@@ -1055,38 +1110,45 @@
 
             <!-- 7 nodos: ángulos cada 51.4°, empezando arriba -->
             <g>
-              <circle cx="200" cy="44" r="15" fill="#1a5632"/><text class="f-num" x="200" y="48" text-anchor="middle">1</text>
+              <circle cx="200" cy="44" r="15" fill="#1a5632"/>
               <circle cx="200" cy="44" r="15" fill="#f0a500" class="anim-step"/>
+              <text class="f-num" x="200" y="48" text-anchor="middle">1</text>
               <text class="f-label" x="200" y="20" text-anchor="middle">Prevenir</text>
             </g>
             <g>
-              <circle cx="266" cy="76" r="15" fill="#1a5632"/><text class="f-num" x="266" y="80" text-anchor="middle">2</text>
-              <circle cx="266" cy="76" r="15" fill="#f0a500" class="anim-step" style="animation-delay:1.15s"/>
+              <circle cx="266" cy="76" r="15" fill="#1a5632"/>
+              <circle cx="266" cy="76" r="15" fill="#f0a500" class="anim-step" style="animation-delay:1.14s"/>
+              <text class="f-num" x="266" y="80" text-anchor="middle">2</text>
               <text class="f-label" x="288" y="64">Detectar</text>
             </g>
             <g>
-              <circle cx="282" cy="147" r="15" fill="#1a5632"/><text class="f-num" x="282" y="151" text-anchor="middle">3</text>
-              <circle cx="282" cy="147" r="15" fill="#f0a500" class="anim-step" style="animation-delay:2.3s"/>
+              <circle cx="282" cy="147" r="15" fill="#1a5632"/>
+              <circle cx="282" cy="147" r="15" fill="#f0a500" class="anim-step" style="animation-delay:2.29s"/>
+              <text class="f-num" x="282" y="151" text-anchor="middle">3</text>
               <text class="f-label" x="302" y="151">Identificar</text>
             </g>
             <g>
-              <circle cx="236" cy="204" r="15" fill="#1a5632"/><text class="f-num" x="236" y="208" text-anchor="middle">4</text>
-              <circle cx="236" cy="204" r="15" fill="#f0a500" class="anim-step" style="animation-delay:3.45s"/>
+              <circle cx="236" cy="204" r="15" fill="#1a5632"/>
+              <circle cx="236" cy="204" r="15" fill="#f0a500" class="anim-step" style="animation-delay:3.43s"/>
+              <text class="f-num" x="236" y="208" text-anchor="middle">4</text>
               <text class="f-label" x="246" y="236" text-anchor="middle">Corregir</text>
             </g>
             <g>
-              <circle cx="164" cy="204" r="15" fill="#1a5632"/><text class="f-num" x="164" y="208" text-anchor="middle">5</text>
-              <circle cx="164" cy="204" r="15" fill="#f0a500" class="anim-step" style="animation-delay:4.6s"/>
+              <circle cx="164" cy="204" r="15" fill="#1a5632"/>
+              <circle cx="164" cy="204" r="15" fill="#f0a500" class="anim-step" style="animation-delay:4.57s"/>
+              <text class="f-num" x="164" y="208" text-anchor="middle">5</text>
               <text class="f-label" x="152" y="236" text-anchor="middle">Controlar</text>
             </g>
             <g>
-              <circle cx="118" cy="147" r="15" fill="#1a5632"/><text class="f-num" x="118" y="151" text-anchor="middle">6</text>
-              <circle cx="118" cy="147" r="15" fill="#f0a500" class="anim-step" style="animation-delay:5.75s"/>
+              <circle cx="118" cy="147" r="15" fill="#1a5632"/>
+              <circle cx="118" cy="147" r="15" fill="#f0a500" class="anim-step" style="animation-delay:5.71s"/>
+              <text class="f-num" x="118" y="151" text-anchor="middle">6</text>
               <text class="f-label" x="98" y="151" text-anchor="end">Verificar</text>
             </g>
             <g>
-              <circle cx="134" cy="76" r="15" fill="#1a5632"/><text class="f-num" x="134" y="80" text-anchor="middle">7</text>
-              <circle cx="134" cy="76" r="15" fill="#f0a500" class="anim-step" style="animation-delay:6.9s"/>
+              <circle cx="134" cy="76" r="15" fill="#1a5632"/>
+              <circle cx="134" cy="76" r="15" fill="#f0a500" class="anim-step" style="animation-delay:6.86s"/>
+              <text class="f-num" x="134" y="80" text-anchor="middle">7</text>
               <text class="f-label" x="112" y="64" text-anchor="end">Documentar</text>
             </g>
           </svg>
